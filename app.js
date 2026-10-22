@@ -69,12 +69,12 @@ async function scene(kind,entry,progress=1){
  if(kind==='card'){
    // 上の細い枠＝ラッキーに合わせたひとこと、色帯＝ラッキー項目、下の大きい枠＝占いコメント。
    await drawCharacter(ctx,entry,524,785,400,true);
-   ctx.font='900 30px "Hiragino Sans","Yu Gothic",sans-serif';
-   centeredText(ctx,entry.lucky.text,524,900,830,42,accent[entry.rank],'transparent',0);
-   ctx.font='900 25px "Hiragino Sans","Yu Gothic",sans-serif';
-   centeredText(ctx,luckyLabel(entry.lucky.name),524,1034,760,32,'#15110e','transparent',0);
-   ctx.font='900 37px "Hiragino Sans","Yu Gothic",sans-serif';
-   centeredText(ctx,entry.lucky.name,524,1080,760,42,'#15110e','transparent',0);
+   ctx.font='900 38px "Hiragino Sans","Yu Gothic",sans-serif';
+   centeredText(ctx,entry.lucky.text,524,898,850,48,accent[entry.rank],'transparent',0);
+   ctx.font='900 32px "Hiragino Sans","Yu Gothic",sans-serif';
+   centeredText(ctx,luckyLabel(entry.lucky.name),524,1028,780,38,'#15110e','transparent',0);
+   ctx.font='900 46px "Hiragino Sans","Yu Gothic",sans-serif';
+   centeredText(ctx,entry.lucky.name,524,1084,780,48,'#15110e','transparent',0);
    ctx.font='900 39px "Hiragino Sans","Yu Gothic",sans-serif';
    centeredText(ctx,entry.message,524,1285,850,52,'#111','transparent',0);
  }
