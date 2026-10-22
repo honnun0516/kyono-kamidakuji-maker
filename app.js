@@ -67,14 +67,14 @@ async function scene(kind,entry,progress=1){
  if(kind==='travel')for(const e of current.entries){const [x,y]=along(pathFor(e.start),progress);await drawCharacter(ctx,e,x,y,118,false,true)}
  if(kind==='goal'||kind==='results')for(const e of current.entries){const size=kind==='results'&&['こてりん','ろっどん'].includes(e.character.name)?150:178;await drawCharacter(ctx,e,amidaX[e.goal],amidaGoalY,size)}
  if(kind==='card'){
-   // 空テンプレート画像の元サイズ(1047px)をそのまま使う。引き伸ばさない。
+   // 上の細い枠＝ラッキーに合わせたひとこと、色帯＝ラッキー項目、下の大きい枠＝占いコメント。
    await drawCharacter(ctx,entry,524,785,400,true);
-   ctx.font='900 42px "Hiragino Sans","Yu Gothic",sans-serif';
-   centeredText(ctx,entry.lucky.name,524,870,820,48,accent[entry.rank],'transparent',0);
-   ctx.font='900 28px "Hiragino Sans","Yu Gothic",sans-serif';
-   centeredText(ctx,entry.lucky.text,524,930,850,38,accent[entry.rank],'transparent',0);
+   ctx.font='900 30px "Hiragino Sans","Yu Gothic",sans-serif';
+   centeredText(ctx,entry.lucky.text,524,900,830,42,accent[entry.rank],'transparent',0);
+   ctx.font='900 25px "Hiragino Sans","Yu Gothic",sans-serif';
+   centeredText(ctx,luckyLabel(entry.lucky.name),524,1034,760,32,'#15110e','transparent',0);
    ctx.font='900 37px "Hiragino Sans","Yu Gothic",sans-serif';
-   centeredText(ctx,luckyLabel(entry.lucky.name),524,1055,760,48,'#15110e','transparent',0);
+   centeredText(ctx,entry.lucky.name,524,1080,760,42,'#15110e','transparent',0);
    ctx.font='900 39px "Hiragino Sans","Yu Gothic",sans-serif';
    centeredText(ctx,entry.message,524,1285,850,52,'#111','transparent',0);
  }
