@@ -1,6 +1,6 @@
 const A='assets/';
 const chars=[
- ['まきまる','makimaru.png','makimaru_text.png'],['かみまる','kamimaru.png','kamimaru_text.png'],['どらぽん','dorapon.png','dorapon_text.png'],['ちょきすけ','chokisuke.png','chokisuke_text.png'],['ととのん','totonon.png','totonon_text.png'],['こてりん','koterin.png','koterin_text.png'],['しゃんぷぅ','shampu.png','shampu_text.png'],['はけぽん','hakepon.png','hakepon_text.png'],['しゅっしゅ','shusshu.png','shusshu_text.png'],['だっかる','dakkaru.png','dakkaru_text.png'],['ろっどん','roddon.png','roddon_text.png']
+ ['まきまる','makimaru.png','makimaru_text.png'],['かみまる','kamimaru_text.png','kamimaru_text.png'],['どらぽん','dorapon.png','dorapon_text.png'],['ちょきすけ','chokisuke.png','chokisuke_text.png'],['ととのん','totonon.png','totonon_text.png'],['こてりん','koterin.png','koterin_text.png'],['しゃんぷぅ','shampu.png','shampu_text.png'],['はけぽん','hakepon.png','hakepon_text.png'],['しゅっしゅ','shusshu.png','shusshu_text.png'],['だっかる','dakkaru.png','dakkaru_text.png'],['ろっどん','roddon.png','roddon_text.png']
 ].map(([name,file,textFile])=>({name,file,textFile}));
 const ranks={
  '髪吉':{asset:'kamikichi.png',messages:['今日の髪、過去イチかも。予定なくても出かけたくなる。','何しても決まる日。寝ぐせまで味方につけそう。','鏡を見るたび「今日いいじゃん」が更新されそう。','前髪・毛先・後ろ姿。今日は全員ちゃんと話が通じます。','適当にやったのに、なぜか美容室帰りっぽくなるかも。','今日の髪、なんかいいねって言われる予感。','すれ違った人が二度見するかも。今日は後ろ姿までいい感じ。','「美容室行った？」って聞かれるかも。行ってなくても今日は言わせておこう。','今日の髪、カメラを向けられても余裕です。','今日の髪、褒められる準備はできてます。あとは出かけるだけ。']},
@@ -43,7 +43,18 @@ function cleanKoterin(im){
  for(let p=0;p<q.length;p++){const i=q[p],x=i%w,y=(i/w)|0;if(x)add(i-1);if(x+1<w)add(i+1);if(y)add(i-w);if(y+1<h)add(i+w)}
  for(const i of q)d[i*4+3]=0;ctx.putImageData(pixels,0,0);cleanedKoterinCache.set(im,c);return c;
 }
-async function drawCharacter(ctx,entry,x,bottom,width,useText=false){let im=await load(A+(useText?entry.character.textFile:entry.character.file));if(entry.character.name==='こてりん'&&!useText)im=cleanKoterin(im);const b=await alphaBounds(im),height=width*b.h/b.w;ctx.drawImage(im,b.l,b.t,b.w,b.h,x-width/2,bottom-height,width,height)}
+async function drawCharacter(ctx,entry,x,bottom,width,useText=false){
+ let im=await load(A+(useText?entry.character.textFile:entry.character.file));
+ // かみまるは移動中だけ、名前プレートを含まない上側のキャラ部分を使う。
+ if(entry.character.name==='かみまる'&&!useText){
+  const crop={x:190,y:25,w:1000,h:850},height=width*crop.h/crop.w;
+  ctx.drawImage(im,crop.x,crop.y,crop.w,crop.h,x-width/2,bottom-height,width,height);
+  return;
+ }
+ if(entry.character.name==='こてりん'&&!useText)im=cleanKoterin(im);
+ const b=await alphaBounds(im),height=width*b.h/b.w;
+ ctx.drawImage(im,b.l,b.t,b.w,b.h,x-width/2,bottom-height,width,height)
+}
 async function fixKoterinPool(){const target=document.querySelector('[data-koterin-preview]');if(!target)return;const im=cleanKoterin(await load(A+'koterin.png')),b=await alphaBounds(im),c=makeCanvas(180,180),ctx=c.getContext('2d'),s=Math.min(150/b.w,150/b.h);ctx.drawImage(im,b.l,b.t,b.w,b.h,15+(150-b.w*s)/2,15+(150-b.h*s)/2,b.w*s,b.h*s);target.src=c.toDataURL('image/png')}
 function makeCanvas(w,h){const c=document.createElement('canvas');c.width=w;c.height=h;return c}
 function linesFor(ctx,text,maxWidth){const lines=[];let line='';for(const ch of [...text]){if(ctx.measureText(line+ch).width>maxWidth&&line){lines.push(line);line=ch}else line+=ch}if(line)lines.push(line);return lines}
