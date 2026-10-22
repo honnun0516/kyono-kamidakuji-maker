@@ -28,7 +28,7 @@ const rungs=[
  {y:789,a:0,b:1},{y:789,a:2,b:3},
  {y:864,a:1,b:2},
  {y:936,a:0,b:1},{y:936,a:2,b:3},
- {y:1006,a:1,b:2},
+ {y:1010,a:1,b:2},
  {y:1084,a:0,b:1},{y:1084,a:2,b:3}
 ];
 const accent={髪吉:'#ff6687',大吉:'#e5ad1b',中吉:'#36aeea',吉:'#a56cec',小吉:'#68c966',凶:'#f2627b'};
@@ -43,11 +43,12 @@ function cleanKoterin(im){
  for(let p=0;p<q.length;p++){const i=q[p],x=i%w,y=(i/w)|0;if(x)add(i-1);if(x+1<w)add(i+1);if(y)add(i-w);if(y+1<h)add(i+w)}
  for(const i of q)d[i*4+3]=0;ctx.putImageData(pixels,0,0);cleanedKoterinCache.set(im,c);return c;
 }
-async function drawCharacter(ctx,entry,x,bottom,width,useText=false){
+async function drawCharacter(ctx,entry,x,bottom,width,useText=false,centerOnPath=false){
  let im=await load(A+(useText?entry.character.textFile:entry.character.file));
  if(entry.character.name==='こてりん'&&!useText)im=cleanKoterin(im);
  const b=await alphaBounds(im),height=width*b.h/b.w;
- ctx.drawImage(im,b.l,b.t,b.w,b.h,x-width/2,bottom-height,width,height)
+ const top=centerOnPath?bottom-height/2:bottom-height;
+ ctx.drawImage(im,b.l,b.t,b.w,b.h,x-width/2,top,width,height)
 }
 async function fixKoterinPool(){const target=document.querySelector('[data-koterin-preview]');if(!target)return;const im=cleanKoterin(await load(A+'koterin.png')),b=await alphaBounds(im),c=makeCanvas(180,180),ctx=c.getContext('2d'),s=Math.min(150/b.w,150/b.h);ctx.drawImage(im,b.l,b.t,b.w,b.h,15+(150-b.w*s)/2,15+(150-b.h*s)/2,b.w*s,b.h*s);target.src=c.toDataURL('image/png')}
 function makeCanvas(w,h){const c=document.createElement('canvas');c.width=w;c.height=h;return c}
@@ -59,7 +60,7 @@ async function scene(kind,entry,progress=1){
  const bgName=kind==='select'?'select.png':kind==='start'||kind==='travel'?'start.png':kind==='goal'?'goal.png':kind==='results'?'results.png':ranks[entry?.rank||'大吉'].asset;
  const bg=await load(A+bgName),c=makeCanvas(bg.width,bg.height),ctx=c.getContext('2d');ctx.drawImage(bg,0,0);
  if(kind==='select'||kind==='start')for(const [i,e] of current.entries.entries()){const base={しゃんぷぅ:145,だっかる:145}[e.character.name]||128;const size=kind==='select'?Math.round(base*1.55):base;const hop=kind==='select'?Math.max(0,Math.sin(progress*Math.PI*6+i*.8))*16:0;await drawCharacter(ctx,e,amidaX[e.start],amidaStartY+4-hop,size,true)}
- if(kind==='travel')for(const e of current.entries){const [x,y]=along(pathFor(e.start),progress);await drawCharacter(ctx,e,x,y,118)}
+ if(kind==='travel')for(const e of current.entries){const [x,y]=along(pathFor(e.start),progress);await drawCharacter(ctx,e,x,y,118,false,true)}
  if(kind==='goal'||kind==='results')for(const e of current.entries){const size=kind==='results'&&['こてりん','ろっどん'].includes(e.character.name)?150:178;await drawCharacter(ctx,e,amidaX[e.goal],amidaGoalY,size)}
  if(kind==='card'){
    // 空テンプレート画像の元サイズ(1047px)をそのまま使う。引き伸ばさない。
