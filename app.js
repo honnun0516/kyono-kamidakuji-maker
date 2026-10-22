@@ -1,6 +1,6 @@
 const A='assets/';
 const chars=[
- ['まきまる','makimaru.png','makimaru_text.png'],['かみまる','kamimaru_text.png','kamimaru_text.png'],['どらぽん','dorapon.png','dorapon_text.png'],['ちょきすけ','chokisuke.png','chokisuke_text.png'],['ととのん','totonon.png','totonon_text.png'],['こてりん','koterin.png','koterin_text.png'],['しゃんぷぅ','shampu.png','shampu_text.png'],['はけぽん','hakepon.png','hakepon_text.png'],['しゅっしゅ','shusshu.png','shusshu_text.png'],['だっかる','dakkaru.png','dakkaru_text.png'],['ろっどん','roddon.png','roddon_text.png']
+ ['まきまる','makimaru.png','makimaru_text.png'],['かみまる','kamimaru.png','kamimaru_text.png'],['どらぽん','dorapon.png','dorapon_text.png'],['ちょきすけ','chokisuke.png','chokisuke_text.png'],['ととのん','totonon.png','totonon_text.png'],['こてりん','koterin.png','koterin_text.png'],['しゃんぷぅ','shampu.png','shampu_text.png'],['はけぽん','hakepon.png','hakepon_text.png'],['しゅっしゅ','shusshu.png','shusshu_text.png'],['だっかる','dakkaru.png','dakkaru_text.png'],['ろっどん','roddon.png','roddon_text.png']
 ].map(([name,file,textFile])=>({name,file,textFile}));
 const ranks={
  '髪吉':{asset:'kamikichi.png',messages:['今日の髪、過去イチかも。予定なくても出かけたくなる。','何しても決まる日。寝ぐせまで味方につけそう。','鏡を見るたび「今日いいじゃん」が更新されそう。','前髪・毛先・後ろ姿。今日は全員ちゃんと話が通じます。','適当にやったのに、なぜか美容室帰りっぽくなるかも。','今日の髪、なんかいいねって言われる予感。','すれ違った人が二度見するかも。今日は後ろ姿までいい感じ。','「美容室行った？」って聞かれるかも。行ってなくても今日は言わせておこう。','今日の髪、カメラを向けられても余裕です。','今日の髪、褒められる準備はできてます。あとは出かけるだけ。']},
