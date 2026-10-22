@@ -53,7 +53,7 @@ function along(points,t){let total=0;for(let i=1;i<points.length;i++)total+=Math
 async function scene(kind,entry,progress=1){
  const bgName=kind==='select'?'select.png':kind==='start'||kind==='travel'?'start.png':kind==='goal'?'goal.png':kind==='results'?'results.png':ranks[entry?.rank||'大吉'].asset;
  const bg=await load(A+bgName),c=makeCanvas(bg.width,bg.height),ctx=c.getContext('2d');ctx.drawImage(bg,0,0);
- if(kind==='select'||kind==='start')for(const e of current.entries){const base={しゃんぷぅ:145,だっかる:145}[e.character.name]||128;const size=kind==='select'?Math.round(base*1.755):base;await drawCharacter(ctx,e,amidaX[e.start],amidaStartY+4,size,true)}
+ if(kind==='select'||kind==='start')for(const e of current.entries){const base={しゃんぷぅ:145,だっかる:145}[e.character.name]||128;const size=kind==='select'?Math.round(base*1.55):base;await drawCharacter(ctx,e,amidaX[e.start],amidaStartY+4,size,true)}
  if(kind==='travel')for(const e of current.entries){const [x,y]=along(pathFor(e.start),progress);await drawCharacter(ctx,e,x,y,118)}
  if(kind==='goal'||kind==='results')for(const e of current.entries){const size=kind==='results'&&['こてりん','ろっどん'].includes(e.character.name)?150:178;await drawCharacter(ctx,e,amidaX[e.goal],amidaGoalY,size)}
  if(kind==='card'){
