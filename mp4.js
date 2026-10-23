@@ -18,7 +18,7 @@ async function exportWithWebCodecs(status){
  for(let i=0;i<30;i++)await add(await scene('select',null,i/30),3);
  await add(await scene('start'),36);
  for(let i=0;i<60;i++)await add(await scene('travel',null,i/59),3);
- await add(await scene('goal'),51);await add(await scene('results'),45);
+ for(let i=0;i<51;i++)await add(await scene('goal',null,i/50),1);await add(await scene('results'),45);
  for(const e of current.entries)await add(await scene('card',e),150);
  await add(await endingFrame(),90);
  await encoder.flush();if(encodeError)throw encodeError;muxer.finalize();
@@ -33,13 +33,13 @@ async function exportInstagramMp4(){if(!current)return;const btn=document.queryS
  if(!mime)throw new Error('No supported video recording format');
  const rec=new MediaRecorder(stream,{mimeType:mime,videoBitsPerSecond:7000000}),parts=[];rec.ondataavailable=e=>e.data.size&&parts.push(e.data);rec.start();
  const holdFrame=async(frame,ms)=>{fitToVideo(video,frame);await new Promise(r=>setTimeout(r,ms))};
- // 本のページを右からめくるように、次の場面へつなぐ。
- const turn=async(from,to)=>{for(let i=0;i<=14;i++){const p=i/14,ctx=video.getContext('2d');fitToVideo(video,to);ctx.save();ctx.globalAlpha=1-p;ctx.drawImage(from,0,0,1080,1920);ctx.restore();await new Promise(r=>setTimeout(r,35))}};
+ // 場面はそのままパッと切り替え、ゴールだけをお祝いの動きにする。
+ const turn=async(from,to)=>{fitToVideo(video,to)};
  const intro=await openingFrame(),selectStart=await scene('select',null,0);await holdFrame(intro,2000);await turn(intro,selectStart);
  for(let i=0;i<30;i++){fitToVideo(video,await scene('select',null,i/30));await new Promise(r=>setTimeout(r,83))}
  const startFrame=await scene('start');fitToVideo(video,startFrame);await holdFrame(startFrame,1200);
  const travelStart=await scene('travel',null,0);await turn(startFrame,travelStart);for(let i=0;i<60;i++){fitToVideo(video,await scene('travel',null,i/59));await new Promise(r=>setTimeout(r,85))}
- const goalFrame=await scene('goal');await turn(await scene('travel',null,1),goalFrame);await holdFrame(goalFrame,1700);
+ const goalFrame=await scene('goal',null,0);await turn(await scene('travel',null,1),goalFrame);for(let i=0;i<51;i++){fitToVideo(video,await scene('goal',null,i/50));await new Promise(r=>setTimeout(r,33))}
  const resultsFrame=await scene('results');fitToVideo(video,resultsFrame);await holdFrame(resultsFrame,1500);
  let previous=resultsFrame;for(const e of current.entries){const card=await scene('card',e);await turn(previous,card);await holdFrame(card,5000);previous=card}
  const ending=await endingFrame();await turn(previous,ending);await holdFrame(ending,3000);
