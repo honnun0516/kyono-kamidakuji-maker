@@ -21,7 +21,7 @@ async function exportWithWebCodecs(status){
  await add(await scene('start'),36);
  for(let i=0;i<153;i++)await add(await scene('travel',null,i/152),1);
  for(let i=0;i<51;i++)await add(await scene('goal',null,i/50),1);for(let i=1;i<=5;i++)await add(await scene('goalResults',null,i/5),1);for(let i=6;i<45;i++)await add(await scene('results',null,i/44),1);
- for(const e of current.entries)await add(await scene('card',e),150);
+ for(const e of current.entries)await add(await scene('card',e),105);
  await add(await endingFrame(),90);
  await encoder.flush();if(encodeError)throw encodeError;muxer.finalize();
  return new Blob([target.buffer],{type:'video/mp4'});
@@ -45,7 +45,7 @@ async function exportInstagramMp4(){if(!current)return;const btn=document.queryS
  await play('goal',51);
  for(let i=1;i<=5;i++){fitToVideo(video,await scene('goalResults',null,i/5));await new Promise(r=>setTimeout(r,1000/30))}
  for(let i=6;i<45;i++){fitToVideo(video,await scene('results',null,i/44));await new Promise(r=>setTimeout(r,1000/30))}
- for(const card of cardFrames)await holdFrame(card,5000);
+ for(const card of cardFrames)await holdFrame(card,3500);
  await holdFrame(ending,3000);
  const stopped=new Promise(r=>rec.addEventListener('stop',r,{once:true}));rec.stop();await stopped;let blob=new Blob(parts,{type:mime});fallbackBlob=blob;
  if(!mime.includes('mp4')){status.textContent='Instagram用MP4に変換しています。初回は少し待ってね。';const ffmpeg=await loadInstagramFfmpeg(),{fetchFile}=instagramFfmpegUtil;await ffmpeg.writeFile('input.webm',await fetchFile(blob));await ffmpeg.exec(['-i','input.webm','-c:v','libx264','-preset','veryfast','-crf','23','-pix_fmt','yuv420p','-movflags','+faststart','output.mp4']);const data=await ffmpeg.readFile('output.mp4');await ffmpeg.deleteFile('input.webm');await ffmpeg.deleteFile('output.mp4');blob=new Blob([data.buffer],{type:'video/mp4'})}
