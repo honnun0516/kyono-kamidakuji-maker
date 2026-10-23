@@ -37,10 +37,10 @@ async function exportInstagramMp4(){if(!current)return;const btn=document.queryS
  const turn=async(from,to)=>{for(let i=0;i<=14;i++){const p=i/14,ctx=video.getContext('2d');fitToVideo(video,to);ctx.save();ctx.globalAlpha=1-p;ctx.drawImage(from,0,0,1080,1920);ctx.restore();await new Promise(r=>setTimeout(r,35))}};
  const intro=await openingFrame(),selectStart=await scene('select',null,0);await holdFrame(intro,2000);await turn(intro,selectStart);
  for(let i=0;i<30;i++){fitToVideo(video,await scene('select',null,i/30));await new Promise(r=>setTimeout(r,83))}
- const startFrame=await scene('start');await turn(await scene('select',null,1),startFrame);await holdFrame(startFrame,1200);
+ const startFrame=await scene('start');fitToVideo(video,startFrame);await holdFrame(startFrame,1200);
  const travelStart=await scene('travel',null,0);await turn(startFrame,travelStart);for(let i=0;i<60;i++){fitToVideo(video,await scene('travel',null,i/59));await new Promise(r=>setTimeout(r,85))}
  const goalFrame=await scene('goal');await turn(await scene('travel',null,1),goalFrame);await holdFrame(goalFrame,1700);
- const resultsFrame=await scene('results');await turn(goalFrame,resultsFrame);await holdFrame(resultsFrame,1500);
+ const resultsFrame=await scene('results');fitToVideo(video,resultsFrame);await holdFrame(resultsFrame,1500);
  let previous=resultsFrame;for(const e of current.entries){const card=await scene('card',e);await turn(previous,card);await holdFrame(card,5000);previous=card}
  const ending=await endingFrame();await turn(previous,ending);await holdFrame(ending,3000);
  const stopped=new Promise(r=>rec.addEventListener('stop',r,{once:true}));rec.stop();await stopped;let blob=new Blob(parts,{type:mime});fallbackBlob=blob;
