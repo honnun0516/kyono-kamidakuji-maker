@@ -32,11 +32,17 @@ async function exportInstagramMp4(){if(!current)return;const btn=document.queryS
  const stream=video.captureStream(30),mime=['video/mp4;codecs=avc1.42E01E','video/mp4;codecs=avc1','video/mp4','video/webm;codecs=vp9'].find(type=>MediaRecorder.isTypeSupported(type));
  if(!mime)throw new Error('No supported video recording format');
  const rec=new MediaRecorder(stream,{mimeType:mime,videoBitsPerSecond:7000000}),parts=[];rec.ondataavailable=e=>e.data.size&&parts.push(e.data);rec.start();
- const hold=async(kind,e,ms)=>{fitToVideo(video,await scene(kind,e));await new Promise(r=>setTimeout(r,ms))};
  const holdFrame=async(frame,ms)=>{fitToVideo(video,frame);await new Promise(r=>setTimeout(r,ms))};
- await holdFrame(await openingFrame(),2000);for(let i=0;i<30;i++){fitToVideo(video,await scene('select',null,i/30));await new Promise(r=>setTimeout(r,83))}
- await hold('start',null,1200);for(let i=0;i<60;i++){fitToVideo(video,await scene('travel',null,i/59));await new Promise(r=>setTimeout(r,85))}
- await hold('goal',null,1700);await hold('results',null,1500);for(const e of current.entries)await hold('card',e,5000);await holdFrame(await endingFrame(),3000);
+ // 本のページを右からめくるように、次の場面へつなぐ。
+ const turn=async(from,to)=>{for(let i=0;i<=10;i++){const p=i/10,ctx=video.getContext('2d');fitToVideo(video,to);ctx.save();ctx.translate(1080,0);ctx.scale(1-p,1);ctx.drawImage(from,-1080,0,1080,1920);ctx.restore();const shade=ctx.createLinearGradient(1080*(1-p)-45,0,1080*(1-p)+10,0);shade.addColorStop(0,'rgba(40,20,10,.26)');shade.addColorStop(1,'rgba(255,255,255,0)');ctx.fillStyle=shade;ctx.fillRect(1080*(1-p)-45,0,55,1920);await new Promise(r=>setTimeout(r,30))}};
+ const intro=await openingFrame(),selectStart=await scene('select',null,0);await holdFrame(intro,2000);await turn(intro,selectStart);
+ for(let i=0;i<30;i++){fitToVideo(video,await scene('select',null,i/30));await new Promise(r=>setTimeout(r,83))}
+ const startFrame=await scene('start');await turn(await scene('select',null,1),startFrame);await holdFrame(startFrame,1200);
+ const travelStart=await scene('travel',null,0);await turn(startFrame,travelStart);for(let i=0;i<60;i++){fitToVideo(video,await scene('travel',null,i/59));await new Promise(r=>setTimeout(r,85))}
+ const goalFrame=await scene('goal');await turn(await scene('travel',null,1),goalFrame);await holdFrame(goalFrame,1700);
+ const resultsFrame=await scene('results');await turn(goalFrame,resultsFrame);await holdFrame(resultsFrame,1500);
+ let previous=resultsFrame;for(const e of current.entries){const card=await scene('card',e);await turn(previous,card);await holdFrame(card,5000);previous=card}
+ const ending=await endingFrame();await turn(previous,ending);await holdFrame(ending,3000);
  const stopped=new Promise(r=>rec.addEventListener('stop',r,{once:true}));rec.stop();await stopped;let blob=new Blob(parts,{type:mime});fallbackBlob=blob;
  if(!mime.includes('mp4')){status.textContent='Instagram用MP4に変換しています。初回は少し待ってね。';const ffmpeg=await loadInstagramFfmpeg(),{fetchFile}=instagramFfmpegUtil;await ffmpeg.writeFile('input.webm',await fetchFile(blob));await ffmpeg.exec(['-i','input.webm','-c:v','libx264','-preset','veryfast','-crf','23','-pix_fmt','yuv420p','-movflags','+faststart','output.mp4']);const data=await ffmpeg.readFile('output.mp4');await ffmpeg.deleteFile('input.webm');await ffmpeg.deleteFile('output.mp4');blob=new Blob([data.buffer],{type:'video/mp4'})}
  offerDownload(blob,save,status);
