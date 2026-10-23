@@ -18,7 +18,7 @@ async function exportWithWebCodecs(status){
  for(let i=0;i<30;i++)await add(await scene('select',null,i/30),3);
  await add(await scene('start'),36);
  for(let i=0;i<60;i++)await add(await scene('travel',null,i/59),3);
- for(let i=0;i<51;i++)await add(await scene('goal',null,i/50),1);await add(await scene('results'),45);
+ for(let i=0;i<51;i++)await add(await scene('goal',null,i/50),1);for(let i=0;i<45;i++)await add(await scene('results',null,i/44),1);
  for(const e of current.entries)await add(await scene('card',e),150);
  await add(await endingFrame(),90);
  await encoder.flush();if(encodeError)throw encodeError;muxer.finalize();
@@ -40,7 +40,7 @@ async function exportInstagramMp4(){if(!current)return;const btn=document.queryS
  const startFrame=await scene('start');fitToVideo(video,startFrame);await holdFrame(startFrame,1200);
  const travelStart=await scene('travel',null,0);await turn(startFrame,travelStart);for(let i=0;i<60;i++){fitToVideo(video,await scene('travel',null,i/59));await new Promise(r=>setTimeout(r,85))}
  const goalFrame=await scene('goal',null,0);await turn(await scene('travel',null,1),goalFrame);for(let i=0;i<51;i++){fitToVideo(video,await scene('goal',null,i/50));await new Promise(r=>setTimeout(r,33))}
- const resultsFrame=await scene('results');fitToVideo(video,resultsFrame);await holdFrame(resultsFrame,1500);
+ const resultsFrame=await scene('results',null,0);fitToVideo(video,resultsFrame);for(let i=0;i<45;i++){fitToVideo(video,await scene('results',null,i/44));await new Promise(r=>setTimeout(r,33))}
  let previous=resultsFrame;for(const e of current.entries){const card=await scene('card',e);await turn(previous,card);await holdFrame(card,5000);previous=card}
  const ending=await endingFrame();await turn(previous,ending);await holdFrame(ending,3000);
  const stopped=new Promise(r=>rec.addEventListener('stop',r,{once:true}));rec.stop();await stopped;let blob=new Blob(parts,{type:mime});fallbackBlob=blob;
