@@ -27,7 +27,9 @@ async function exportWithWebCodecs(status){
 function offerDownload(blob,save,status){if(videoUrl)URL.revokeObjectURL(videoUrl);videoUrl=URL.createObjectURL(blob);save.href=videoUrl;save.download='今日の髪だくじ_'+new Date().toISOString().slice(0,10)+'.mp4';save.hidden=false;status.textContent='Instagram用MP4ができました。緑の「動画を保存する」を押してね。';}
 async function exportInstagramMp4(){if(!current)return;const btn=document.querySelector('#download'),save=document.querySelector('#save-video'),status=document.querySelector('#status');let fallbackBlob;btn.disabled=true;save.hidden=true;status.textContent='MP4を書き出しています。少し待ってね。';try{
  const video=makeCanvas(1080,1920);
- if(!video.captureStream||!window.MediaRecorder){offerDownload(await exportWithWebCodecs(status),save,status);return}
+ // iPhone/iPad は WebM→FFmpeg 変換が重すぎて止まりやすいため、最初から直接MP4を作る。
+ const isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+ if(isIOS||!video.captureStream||!window.MediaRecorder){offerDownload(await exportWithWebCodecs(status),save,status);return}
  const stream=video.captureStream(30),mime=MediaRecorder.isTypeSupported('video/mp4;codecs=h264')?'video/mp4;codecs=h264':'video/webm;codecs=vp9';
  const rec=new MediaRecorder(stream,{mimeType:mime,videoBitsPerSecond:7000000}),parts=[];rec.ondataavailable=e=>e.data.size&&parts.push(e.data);rec.start();
  const hold=async(kind,e,ms)=>{fitToVideo(video,await scene(kind,e));await new Promise(r=>setTimeout(r,ms))};
