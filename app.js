@@ -68,7 +68,7 @@ async function scene(kind,entry,progress=1){
  if(kind==='select'||kind==='start')for(const [i,e] of current.entries.entries()){const base={しゃんぷぅ:145,だっかる:145}[e.character.name]||128;const size=kind==='select'?Math.round(base*1.55):base;const hop=kind==='select'?Math.max(0,Math.sin(progress*Math.PI*6+i*.8))*16:0;await drawCharacter(ctx,e,amidaX[e.start],amidaStartY+4-hop,size,true)}
  if(kind==='travel')for(const e of current.entries){const [x,y]=along(pathFor(e.start),progress);await drawCharacter(ctx,e,x,y,118,false,true)}
  if(kind==='goal'){const burst=Math.min(1,progress*1.45);drawCelebrationConfetti(ctx,burst);for(const [i,e] of current.entries.entries()){const size=['こてりん','ろっどん'].includes(e.character.name)?150:178;const hop=Math.max(0,Math.sin(progress*Math.PI*4+i*.9))*30;await drawCharacter(ctx,e,amidaX[e.goal],amidaGoalY-hop,size)}}
- if(kind==='results'){const fall=1+Math.min(1,progress)*.6;drawCelebrationConfetti(ctx,fall,1-Math.min(1,progress)*.8);for(const e of current.entries){const size=['こてりん','ろっどん'].includes(e.character.name)?150:178;await drawCharacter(ctx,e,amidaX[e.goal],amidaGoalY,size)}}
+ if(kind==='results'){const settled=Math.min(1,progress),fall=1+settled*.6;drawCelebrationConfetti(ctx,fall,1-settled*.8);for(const [i,e] of current.entries.entries()){const size=['こてりん','ろっどん'].includes(e.character.name)?150:178;const hop=(1-settled)*Math.max(0,Math.sin(i*.9))*30;await drawCharacter(ctx,e,amidaX[e.goal],amidaGoalY-hop,size)}}
  if(kind==='card'){
    // 上の細い枠＝占い結果のコメント、色帯＝ラッキー項目、下の大きい枠＝ラッキーに合わせたひとこと。
    await drawCharacter(ctx,entry,524,785,400,true);
