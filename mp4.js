@@ -2,6 +2,7 @@ let instagramFfmpeg,instagramFfmpegApi,instagramFfmpegUtil,openingImage,endingIm
 async function openingFrame(){if(!openingImage)openingImage=await new Promise((resolve,reject)=>{const image=new Image();image.onload=()=>resolve(image);image.onerror=reject;image.src='assets/opening.png';});const frame=makeCanvas(openingImage.width,openingImage.height);frame.getContext('2d').drawImage(openingImage,0,0);return frame;}
 async function endingFrame(){if(!endingImage)endingImage=await new Promise((resolve,reject)=>{const image=new Image();image.onload=()=>resolve(image);image.onerror=reject;image.src='assets/1-写真1.jpg';});const frame=makeCanvas(endingImage.width,endingImage.height);frame.getContext('2d').drawImage(endingImage,0,0);return frame;}
 async function prepareVideoAssets(){const files=new Set(['select.png','start.png','goal.png','results.png',...current.entries.map(e=>ranks[e.rank].asset),...current.entries.flatMap(e=>[e.character.file,e.character.textFile])]);await Promise.all([openingFrame(),endingFrame(),...Array.from(files,file=>load(A+file))]);await Promise.all(current.entries.map(async e=>{let plain=await load(A+e.character.file);if(e.character.name==='こてりん')plain=cleanKoterin(plain);await alphaBounds(plain);await alphaBounds(await load(A+e.character.textFile))}))}
+function blendFrames(from,to,amount){const frame=makeCanvas(1080,1920),layer=makeCanvas(1080,1920);fitToVideo(frame,from);fitToVideo(layer,to);const ctx=frame.getContext('2d');ctx.globalAlpha=amount;ctx.drawImage(layer,0,0);return frame}
 async function loadInstagramFfmpeg(){if(instagramFfmpeg)return instagramFfmpeg;instagramFfmpegApi=window.FFmpegWASM||await import('https://unpkg.com/@ffmpeg/ffmpeg@0.12.10/dist/esm/index.js');instagramFfmpegUtil=window.FFmpegUtil||await import('https://unpkg.com/@ffmpeg/util@0.12.1/dist/esm/index.js');const {FFmpeg}=instagramFfmpegApi,{toBlobURL}=instagramFfmpegUtil;const base='https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.10/dist/umd';instagramFfmpeg=new FFmpeg();await instagramFfmpeg.load({coreURL:await toBlobURL(base+'/ffmpeg-core.js','text/javascript'),wasmURL:await toBlobURL(base+'/ffmpeg-core.wasm','application/wasm'),workerURL:await toBlobURL('https://unpkg.com/@ffmpeg/ffmpeg@0.12.10/dist/umd/814.ffmpeg.js','text/javascript')});return instagramFfmpeg;}
 async function loadMp4Muxer(){return await import('https://cdn.jsdelivr.net/npm/mp4-muxer@5.2.2/build/mp4-muxer.mjs')}
 // iPhone Safari は canvas.captureStream が使えないことがあるため、画像の各コマを直接 H.264/MP4 にする予備ルート。
@@ -19,7 +20,7 @@ async function exportWithWebCodecs(status){
  for(let i=0;i<75;i++)await add(await scene('select',null,i/74),1);
  await add(await scene('start'),36);
  for(let i=0;i<153;i++)await add(await scene('travel',null,i/152),1);
- for(let i=0;i<51;i++)await add(await scene('goal',null,i/50),1);for(let i=0;i<45;i++)await add(await scene('results',null,i/44),1);
+ for(let i=0;i<51;i++)await add(await scene('goal',null,i/50),1);const goalEnd=await scene('goal',null,1),resultStart=await scene('results',null,0);for(let i=1;i<=5;i++)await add(blendFrames(goalEnd,resultStart,i/5),1);for(let i=1;i<45;i++)await add(await scene('results',null,i/44),1);
  for(const e of current.entries)await add(await scene('card',e),150);
  await add(await endingFrame(),90);
  await encoder.flush();if(encodeError)throw encodeError;muxer.finalize();
@@ -42,7 +43,8 @@ async function exportInstagramMp4(){if(!current)return;const btn=document.queryS
  await holdFrame(startFrame,1200);
  await play('travel',153);
  await play('goal',51);
- await play('results',45);
+ const goalEnd=await scene('goal',null,1),resultStart=await scene('results',null,0);for(let i=1;i<=5;i++){fitToVideo(video,blendFrames(goalEnd,resultStart,i/5));await new Promise(r=>setTimeout(r,1000/30))}
+ for(let i=1;i<45;i++){fitToVideo(video,await scene('results',null,i/44));await new Promise(r=>setTimeout(r,1000/30))}
  for(const card of cardFrames)await holdFrame(card,5000);
  await holdFrame(ending,3000);
  const stopped=new Promise(r=>rec.addEventListener('stop',r,{once:true}));rec.stop();await stopped;let blob=new Blob(parts,{type:mime});fallbackBlob=blob;
