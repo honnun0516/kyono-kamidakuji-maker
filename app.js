@@ -57,7 +57,8 @@ async function drawCharacter(ctx,entry,x,bottom,width,useText=false,centerOnPath
 async function fixKoterinPool(){const target=document.querySelector('[data-koterin-preview]');if(!target)return;const im=cleanKoterin(await load(A+'koterin.png')),b=await alphaBounds(im),c=makeCanvas(180,180),ctx=c.getContext('2d'),s=Math.min(150/b.w,150/b.h);ctx.drawImage(im,b.l,b.t,b.w,b.h,15+(150-b.w*s)/2,15+(150-b.h*s)/2,b.w*s,b.h*s);target.src=c.toDataURL('image/png')}
 function makeCanvas(w,h){const c=document.createElement('canvas');c.width=w;c.height=h;return c}
 function linesFor(ctx,text,maxWidth){const lines=[];let line='';for(const ch of [...text]){if(ctx.measureText(line+ch).width>maxWidth&&line){lines.push(line);line=ch}else line+=ch}if(line)lines.push(line);return lines}
-function centeredText(ctx,text,x,centerY,maxWidth,lineHeight,fill,stroke='#fff',strokeWidth=5){const lines=linesFor(ctx,text,maxWidth);const first=centerY-(lines.length-1)*lineHeight/2;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle=fill;ctx.strokeStyle=stroke;ctx.lineWidth=strokeWidth;for(let i=0;i<lines.length;i++){const y=first+i*lineHeight;ctx.strokeText(lines[i],x,y);ctx.fillText(lines[i],x,y)}}
+function centeredText(ctx,text,x,centerY,maxWidth,lineHeight,fill,stroke='#fff',strokeWidth=5){const lines=Array.isArray(text)?text:linesFor(ctx,text,maxWidth);const first=centerY-(lines.length-1)*lineHeight/2;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle=fill;ctx.strokeStyle=stroke;ctx.lineWidth=strokeWidth;for(let i=0;i<lines.length;i++){const y=first+i*lineHeight;ctx.strokeText(lines[i],x,y);ctx.fillText(lines[i],x,y)}}
+function fortuneCommentLines(text){const clean=text.replace(/。/g,'').trim();if(clean.length<=18)return[clean.replace(/、/g,'')];const comma=clean.indexOf('、');if(comma>0&&clean.length-comma-1<=20)return[clean.slice(0,comma),clean.slice(comma+1)];const cut=Math.ceil(clean.length/2);return[clean.slice(0,cut).replace(/、$/,''),clean.slice(cut).replace(/^、/,'')]}
 function pathFor(color){let col=starts.indexOf(color),points=[[amidaX[color],amidaStartY]];for(const rung of rungs){if(col===rung.a||col===rung.b){points.push([amidaX[starts[col]],rung.y]);col=col===rung.a?rung.b:rung.a;points.push([amidaX[starts[col]],rung.y])}}points.push([amidaX[starts[col]],amidaGoalY]);return points}
 function along(points,t){let total=0;for(let i=1;i<points.length;i++)total+=Math.hypot(points[i][0]-points[i-1][0],points[i][1]-points[i-1][1]);let want=total*Math.min(1,Math.max(0,t));for(let i=1;i<points.length;i++){const dx=points[i][0]-points[i-1][0],dy=points[i][1]-points[i-1][1],d=Math.hypot(dx,dy);if(want<=d){const f=d?want/d:0;return[points[i-1][0]+dx*f,points[i-1][1]+dy*f]}want-=d}return points.at(-1)}
 async function scene(kind,entry,progress=1){
@@ -72,13 +73,13 @@ async function scene(kind,entry,progress=1){
    // 中吉・吉・凶の台紙は枠が少し下にあるため、大吉と同じ見え方になるよう補正する。
    const cardTextY=['中吉','吉','凶'].includes(entry.rank)?14:0;
    ctx.font='900 38px "Hiragino Sans","Yu Gothic",sans-serif';
-   centeredText(ctx,entry.message,524,898+cardTextY,850,48,accent[entry.rank],'transparent',0);
+   centeredText(ctx,fortuneCommentLines(entry.message),524,898+cardTextY,850,48,accent[entry.rank],'transparent',0);
    ctx.font='900 32px "Hiragino Sans","Yu Gothic",sans-serif';
    centeredText(ctx,luckyLabel(entry.lucky.name),524,1028+cardTextY,780,38,'#15110e','transparent',0);
    ctx.font='900 46px "Hiragino Sans","Yu Gothic",sans-serif';
    centeredText(ctx,entry.lucky.name,524,1084+cardTextY,780,48,'#15110e','transparent',0);
-   ctx.font='900 39px "Hiragino Sans","Yu Gothic",sans-serif';
-   centeredText(ctx,entry.lucky.text,524,1285+cardTextY,850,52,'#111','transparent',0);
+   ctx.font='900 44px "Hiragino Sans","Yu Gothic",sans-serif';
+   centeredText(ctx,entry.lucky.text.replace(/。/g,''),524,1285+cardTextY,850,58,'#111','transparent',0);
  }
  return c;
 }
