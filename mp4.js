@@ -34,7 +34,7 @@ async function exportInstagramMp4(){if(!current)return;const btn=document.queryS
  const rec=new MediaRecorder(stream,{mimeType:mime,videoBitsPerSecond:7000000}),parts=[];rec.ondataavailable=e=>e.data.size&&parts.push(e.data);rec.start();
  const holdFrame=async(frame,ms)=>{fitToVideo(video,frame);await new Promise(r=>setTimeout(r,ms))};
  // 本のページを右からめくるように、次の場面へつなぐ。
- const turn=async(from,to)=>{for(let i=0;i<=30;i++){const p=i/30,ctx=video.getContext('2d'),fold=1-p*.92;fitToVideo(video,to);if(i<30){ctx.save();ctx.translate(1080,0);ctx.rotate(-p*.15);ctx.transform(fold,0,-p*.12,1,0,0);ctx.drawImage(from,-1080,0,1080,1920);ctx.restore();const edge=1080-1080*fold;ctx.save();ctx.beginPath();ctx.moveTo(1080,0);ctx.lineTo(edge,1920);ctx.lineTo(edge+58,1920);ctx.lineTo(1080,0);const shade=ctx.createLinearGradient(edge,0,edge+80,0);shade.addColorStop(0,'rgba(55,28,14,.34)');shade.addColorStop(1,'rgba(255,255,255,0)');ctx.fillStyle=shade;ctx.fill();ctx.restore()}await new Promise(r=>setTimeout(r,45))}};
+ const turn=async(from,to)=>{for(let i=0;i<=14;i++){const p=i/14,ctx=video.getContext('2d');fitToVideo(video,to);ctx.save();ctx.globalAlpha=1-p;ctx.drawImage(from,0,0,1080,1920);ctx.restore();await new Promise(r=>setTimeout(r,35))}};
  const intro=await openingFrame(),selectStart=await scene('select',null,0);await holdFrame(intro,2000);await turn(intro,selectStart);
  for(let i=0;i<30;i++){fitToVideo(video,await scene('select',null,i/30));await new Promise(r=>setTimeout(r,83))}
  const startFrame=await scene('start');await turn(await scene('select',null,1),startFrame);await holdFrame(startFrame,1200);
