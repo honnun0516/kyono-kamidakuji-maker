@@ -47,12 +47,13 @@ function cleanKoterin(im){
  for(let p=0;p<q.length;p++){const i=q[p],x=i%w,y=(i/w)|0;if(x)add(i-1);if(x+1<w)add(i+1);if(y)add(i-w);if(y+1<h)add(i+w)}
  for(const i of q)d[i*4+3]=0;ctx.putImageData(pixels,0,0);cleanedKoterinCache.set(im,c);return c;
 }
-async function drawCharacter(ctx,entry,x,bottom,width,useText=false,centerOnPath=false){
+async function drawCharacter(ctx,entry,x,bottom,width,useText=false,centerOnPath=false,tilt=0){
  let im=await load(A+(useText?entry.character.textFile:entry.character.file));
  if(entry.character.name==='こてりん'&&!useText)im=cleanKoterin(im);
  const b=await alphaBounds(im),height=width*b.h/b.w;
  const top=centerOnPath?bottom-height/2:bottom-height;
- ctx.drawImage(im,b.l,b.t,b.w,b.h,x-width/2,top,width,height)
+ if(!tilt){ctx.drawImage(im,b.l,b.t,b.w,b.h,x-width/2,top,width,height);return}
+ ctx.save();ctx.translate(x,top+height/2);ctx.rotate(tilt);ctx.drawImage(im,b.l,b.t,b.w,b.h,-width/2,-height/2,width,height);ctx.restore()
 }
 async function fixKoterinPool(){const target=document.querySelector('[data-koterin-preview]');if(!target)return;const im=cleanKoterin(await load(A+'koterin.png')),b=await alphaBounds(im),c=makeCanvas(180,180),ctx=c.getContext('2d'),s=Math.min(150/b.w,150/b.h);ctx.drawImage(im,b.l,b.t,b.w,b.h,15+(150-b.w*s)/2,15+(150-b.h*s)/2,b.w*s,b.h*s);target.src=c.toDataURL('image/png')}
 function makeCanvas(w,h){const c=document.createElement('canvas');c.width=w;c.height=h;return c}
@@ -61,14 +62,15 @@ function centeredText(ctx,text,x,centerY,maxWidth,lineHeight,fill,stroke='#fff',
 function fortuneCommentLines(text){const clean=text.trim();if(clean.length<=20)return[clean];const marks=[];for(let i=0;i<clean.length;i++)if(clean[i]==='、'||clean[i]==='。')marks.push(i+1);const comma=clean.indexOf('、');if(comma>0&&clean.length-comma-1<=20)return[clean.slice(0,comma+1),clean.slice(comma+1)];const middle=clean.length/2;const cut=marks.length?marks.reduce((best,pos)=>Math.abs(pos-middle)<Math.abs(best-middle)?pos:best,marks[0]):Math.ceil(middle);return[clean.slice(0,cut),clean.slice(cut)]}
 function pathFor(color){let col=starts.indexOf(color),points=[[amidaX[color],amidaStartY]];for(const rung of rungs){if(col===rung.a||col===rung.b){points.push([amidaX[starts[col]],rung.y]);col=col===rung.a?rung.b:rung.a;points.push([amidaX[starts[col]],rung.y])}}points.push([amidaX[starts[col]],amidaGoalY]);return points}
 function along(points,t){let total=0;for(let i=1;i<points.length;i++)total+=Math.hypot(points[i][0]-points[i-1][0],points[i][1]-points[i-1][1]);let want=total*Math.min(1,Math.max(0,t));for(let i=1;i<points.length;i++){const dx=points[i][0]-points[i-1][0],dy=points[i][1]-points[i-1][1],d=Math.hypot(dx,dy);if(want<=d){const f=d?want/d:0;return[points[i-1][0]+dx*f,points[i-1][1]+dy*f]}want-=d}return points.at(-1)}
+function alongChoppy(points,t){const n=points.length-1,clamped=Math.min(1,Math.max(0,t)),raw=clamped*n,index=Math.min(n-1,Math.floor(raw)),phase=clamped===1?1:raw-index,moving=phase<.82&&clamped<1,eased=moving?(.5-.5*Math.cos(Math.PI*(phase/.82))):1,a=points[index],b=points[index+1],x=a[0]+(b[0]-a[0])*eased,y=a[1]+(b[1]-a[1])*eased;return{x,y,bob:moving?Math.sin(Math.PI*eased)*7:0,tilt:moving?Math.sin(Math.PI*eased*2)*.055:0}}
 function drawCelebrationConfetti(ctx,time){const launch=Math.min(1,time),fall=Math.max(0,time-1);for(let i=0;i<22;i++){const left=i<11,slot=i%11,angle=(-1.15+slot*.23)*(left?1:-1),distance=launch*(150+slot*34),x=(left?58:990)+(left?Math.cos(angle)*distance:-Math.cos(angle)*distance)+(left?1:-1)*fall*(18+slot*2),y=660+Math.sin(angle)*distance+slot*22+launch*launch*250+fall*(130+slot*14)+fall*fall*150,opacity=Math.max(0,1-fall*.8);ctx.save();ctx.globalAlpha=opacity;ctx.translate(x,y);ctx.rotate((left?-1:1)*(slot*.38+time*2.8));ctx.fillStyle=['#ff7184','#ffd14a','#35b7ec','#70d476','#b487ec'][i%5];ctx.fillRect(-9,-20,18,40);ctx.restore()}}
 async function scene(kind,entry,progress=1){
- const bgName=kind==='select'?'select.png':kind==='start'||kind==='travel'?'start.png':kind==='goal'?'goal.png':kind==='results'?'results.png':ranks[entry?.rank||'大吉'].asset;
- const bg=await load(A+bgName),c=makeCanvas(bg.width,bg.height),ctx=c.getContext('2d');ctx.drawImage(bg,0,0);
+ const bgName=kind==='select'?'select.png':kind==='start'||kind==='travel'?'start.png':kind==='goal'||kind==='goalResults'?'goal.png':kind==='results'?'results.png':ranks[entry?.rank||'大吉'].asset;
+ const bg=await load(A+bgName),c=makeCanvas(bg.width,bg.height),ctx=c.getContext('2d');ctx.drawImage(bg,0,0);if(kind==='goalResults'){const resultBg=await load(A+'results.png');ctx.globalAlpha=progress;ctx.drawImage(resultBg,0,0);ctx.globalAlpha=1}
  if(kind==='select'||kind==='start')for(const [i,e] of current.entries.entries()){const base={しゃんぷぅ:145,だっかる:145}[e.character.name]||128;const size=kind==='select'?Math.round(base*1.55):base;const hop=kind==='select'?Math.max(0,Math.sin(progress*Math.PI*6+i*.8))*16:0;await drawCharacter(ctx,e,amidaX[e.start],amidaStartY+4-hop,size,true)}
- if(kind==='travel')for(const e of current.entries){const [x,y]=along(pathFor(e.start),progress);await drawCharacter(ctx,e,x,y,118,false,true)}
- if(kind==='goal'){drawCelebrationConfetti(ctx,progress);for(const [i,e] of current.entries.entries()){const size=['こてりん','ろっどん'].includes(e.character.name)?150:178;const hop=Math.abs(Math.sin(progress*Math.PI*4+i*.9))*30;await drawCharacter(ctx,e,amidaX[e.goal],amidaGoalY-hop,size)}}
- if(kind==='results'){const settled=Math.min(1,progress);drawCelebrationConfetti(ctx,1+settled);for(const [i,e] of current.entries.entries()){const size=['こてりん','ろっどん'].includes(e.character.name)?150:178;const hop=(1-settled)*Math.abs(Math.sin(i*.9))*30;await drawCharacter(ctx,e,amidaX[e.goal],amidaGoalY-hop,size)}}
+ if(kind==='travel')for(const e of current.entries){const move=alongChoppy(pathFor(e.start),progress);await drawCharacter(ctx,e,move.x,move.y-move.bob,118,false,true,move.tilt)}
+ if(kind==='goal'||kind==='goalResults'){const settled=kind==='goal'?0:progress*5/44,time=kind==='goal'?progress:1+settled;drawCelebrationConfetti(ctx,time);for(const [i,e] of current.entries.entries()){const size=['こてりん','ろっどん'].includes(e.character.name)?150:178;const hop=kind==='goal'?Math.abs(Math.sin(progress*Math.PI*4+i*.9))*16:(1-settled)*Math.abs(Math.sin(i*.9))*16;await drawCharacter(ctx,e,amidaX[e.goal],amidaGoalY-hop,size)}}
+ if(kind==='results'){const settled=Math.min(1,progress);drawCelebrationConfetti(ctx,1+settled);for(const [i,e] of current.entries.entries()){const size=['こてりん','ろっどん'].includes(e.character.name)?150:178;const hop=(1-settled)*Math.abs(Math.sin(i*.9))*16;await drawCharacter(ctx,e,amidaX[e.goal],amidaGoalY-hop,size)}}
  if(kind==='card'){
    // 上の細い枠＝占い結果のコメント、色帯＝ラッキー項目、下の大きい枠＝ラッキーに合わせたひとこと。
    await drawCharacter(ctx,entry,524,785,400,true);
