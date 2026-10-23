@@ -67,18 +67,18 @@ async function scene(kind,entry,progress=1){
  if(kind==='travel')for(const e of current.entries){const [x,y]=along(pathFor(e.start),progress);await drawCharacter(ctx,e,x,y,118,false,true)}
  if(kind==='goal'||kind==='results')for(const e of current.entries){const size=['こてりん','ろっどん'].includes(e.character.name)?150:178;await drawCharacter(ctx,e,amidaX[e.goal],amidaGoalY,size)}
  if(kind==='card'){
-   // 上の細い枠＝ラッキーに合わせたひとこと、色帯＝ラッキー項目、下の大きい枠＝占いコメント。
+   // 上の細い枠＝占い結果のコメント、色帯＝ラッキー項目、下の大きい枠＝ラッキーに合わせたひとこと。
    await drawCharacter(ctx,entry,524,785,400,true);
    // 中吉・吉・凶の台紙は枠が少し下にあるため、大吉と同じ見え方になるよう補正する。
    const cardTextY=['中吉','吉','凶'].includes(entry.rank)?14:0;
    ctx.font='900 38px "Hiragino Sans","Yu Gothic",sans-serif';
-   centeredText(ctx,entry.lucky.text,524,898+cardTextY,850,48,accent[entry.rank],'transparent',0);
+   centeredText(ctx,entry.message,524,898+cardTextY,850,48,accent[entry.rank],'transparent',0);
    ctx.font='900 32px "Hiragino Sans","Yu Gothic",sans-serif';
    centeredText(ctx,luckyLabel(entry.lucky.name),524,1028+cardTextY,780,38,'#15110e','transparent',0);
    ctx.font='900 46px "Hiragino Sans","Yu Gothic",sans-serif';
    centeredText(ctx,entry.lucky.name,524,1084+cardTextY,780,48,'#15110e','transparent',0);
    ctx.font='900 39px "Hiragino Sans","Yu Gothic",sans-serif';
-   centeredText(ctx,entry.message,524,1285+cardTextY,850,52,'#111','transparent',0);
+   centeredText(ctx,entry.lucky.text,524,1285+cardTextY,850,52,'#111','transparent',0);
  }
  return c;
 }
