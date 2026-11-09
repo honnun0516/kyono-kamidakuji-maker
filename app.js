@@ -70,6 +70,7 @@ function makeCanvas(w,h){const c=document.createElement('canvas');c.width=w;c.he
 function linesFor(ctx,text,maxWidth){const lines=[];for(const part of String(text).split('\n')){let line='';for(const ch of [...part]){if(ctx.measureText(line+ch).width>maxWidth&&line){lines.push(line);line=ch}else line+=ch}if(line)lines.push(line)}return lines.length?lines:['']}
 function naturalLines(ctx,text,maxWidth){const lines=[];for(const part of String(text).trim().split('\n')){let rest=part.trim();while(rest){const chars=[...rest];let fit=0,breakAt=0;for(let i=0;i<chars.length;i++){if(ctx.measureText(chars.slice(0,i+1).join('')).width>maxWidth)break;fit=i+1;if('、。！？!?・'.includes(chars[i]))breakAt=i+1}if(!fit){lines.push(chars[0]);rest=chars.slice(1).join('');continue}const cut=fit===chars.length?fit:(breakAt>=Math.ceil(fit*.55)?breakAt:fit);lines.push(chars.slice(0,cut).join(''));rest=chars.slice(cut).join('').trim()}}return lines.length?lines:['']}
 function fortuneCommentLayout(ctx,text,maxWidth){for(const size of [38,34,30,27]){ctx.font=`900 ${size}px "Hiragino Sans","Yu Gothic",sans-serif`;const lines=naturalLines(ctx,text,maxWidth);if(lines.length<=2||size===27)return{size,lines,lineHeight:size>=34?48:38}}}
+function luckyCommentLayout(ctx,text,maxWidth){for(const size of [44,40,36,32]){ctx.font=`900 ${size}px "Hiragino Sans","Yu Gothic",sans-serif`;const lines=naturalLines(ctx,String(text).replace(/。/g,''),maxWidth);if(lines.length<=3||size===32)return{size,lines,lineHeight:size>=40?58:46}}}
 function centeredText(ctx,text,x,centerY,maxWidth,lineHeight,fill,stroke='#fff',strokeWidth=5){const lines=Array.isArray(text)?text:linesFor(ctx,text,maxWidth);const first=centerY-(lines.length-1)*lineHeight/2;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle=fill;ctx.strokeStyle=stroke;ctx.lineWidth=strokeWidth;for(let i=0;i<lines.length;i++){const y=first+i*lineHeight;ctx.strokeText(lines[i],x,y);ctx.fillText(lines[i],x,y)}}
 function pathFor(color){let col=starts.indexOf(color),points=[[amidaX[color],amidaStartY]];for(const rung of rungs){if(col===rung.a||col===rung.b){points.push([amidaX[starts[col]],rung.y]);col=col===rung.a?rung.b:rung.a;points.push([amidaX[starts[col]],rung.y])}}points.push([amidaX[starts[col]],amidaGoalY]);return points}
 function along(points,t){let total=0;for(let i=1;i<points.length;i++)total+=Math.hypot(points[i][0]-points[i-1][0],points[i][1]-points[i-1][1]);let want=total*Math.min(1,Math.max(0,t));for(let i=1;i<points.length;i++){const dx=points[i][0]-points[i-1][0],dy=points[i][1]-points[i-1][1],d=Math.hypot(dx,dy);if(want<=d){const f=d?want/d:0;return[points[i-1][0]+dx*f,points[i-1][1]+dy*f]}want-=d}return points.at(-1)}
@@ -95,8 +96,9 @@ async function scene(kind,entry,progress=1){
    centeredText(ctx,luckyLabel(entry.lucky.name),524,1028+cardTextY,780,38,'#15110e','transparent',0);
    ctx.font='900 46px "Hiragino Sans","Yu Gothic",sans-serif';
    centeredText(ctx,entry.lucky.name,524,1084+cardTextY,780,48,'#15110e','transparent',0);
-   ctx.font='900 44px "Hiragino Sans","Yu Gothic",sans-serif';
-   centeredText(ctx,entry.lucky.text.replace(/。/g,''),524,1285+cardTextY,850,58,'#111','transparent',0);
+   const luckyLayout=luckyCommentLayout(ctx,entry.lucky.text,850);
+   ctx.font=`900 ${luckyLayout.size}px "Hiragino Sans","Yu Gothic",sans-serif`;
+   centeredText(ctx,luckyLayout.lines,524,1285+cardTextY,850,luckyLayout.lineHeight,'#111','transparent',0);
  }
  return c;
 }
