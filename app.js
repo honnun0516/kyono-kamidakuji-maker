@@ -112,16 +112,7 @@ async function scene(kind,entry,progress=1){
  if(kind==='results'){
    // 元の結果背景だけを表示する。あみだの上へ説明文字は重ねない。
  }
- if(kind==='announce'){
-   // announcementIndex は運勢順位。ゴール色・キャラの並びには依存しない。
-   drawCelebrationConfetti(ctx,1.3+entry.announcementIndex*.12);
-   await drawCharacter(ctx,entry,524,780,300,true);
-   roundedPanel(ctx,94,1000,860,280,42,'#fffdf8',accent[entry.rank],8);
-   ctx.textAlign='center';ctx.textBaseline='middle';
-   ctx.font='800 42px "Hiragino Sans","Yu Gothic",sans-serif';ctx.fillStyle=accent[entry.rank];ctx.fillText('第'+entry.announcementIndex+'発表',524,1065);
-   ctx.font='900 104px "Hiragino Sans","Yu Gothic",sans-serif';ctx.fillStyle='#3b2116';ctx.fillText(entry.rank,524,1160);
-   ctx.font='800 36px "Hiragino Sans","Yu Gothic",sans-serif';ctx.fillStyle='#5b4036';ctx.fillText(entry.character.name,524,1230);
- }
+
  if(kind==='card'){
    // 上の細い枠＝占い結果のコメント、色帯＝ラッキー項目、下の大きい枠＝ラッキーに合わせたひとこと。
    await drawCharacter(ctx,entry,524,785,400,true);
@@ -159,12 +150,8 @@ async function exportMp4(){
  // 線は固定。4人だけが、実際のあみだの横線を通って移動する。
  for(let i=0;i<=36;i++){fitToVideo(video,await scene('travel',null,i/36));await new Promise(r=>setTimeout(r,85))}
  await hold('goal',null,1700);
- // 結果一覧で全員を先見せしない。ゴール直後から、運勢順位で1人ずつ発表する。
- await hold('results',null,1100);
- for(const e of current.announcementEntries){
-   await hold('announce',e,900);
-   await hold('card',e,3500);
- }
+ // ゴール直後から、運勢順位で通常の結果カードだけを1人ずつ見せる。
+ for(const e of current.announcementEntries)await hold('card',e,3500);
  const stopped=new Promise(r=>rec.addEventListener('stop',r,{once:true}));rec.stop();await stopped;
  const blob=new Blob(parts,{type:mime});if(videoUrl)URL.revokeObjectURL(videoUrl);videoUrl=URL.createObjectURL(blob);const ext=mime.includes('mp4')?'mp4':'webm';save.href=videoUrl;save.download=`今日の髪だくじ_${new Date().toISOString().slice(0,10)}.${ext}`;save.hidden=false;btn.disabled=false;document.querySelector('#status').textContent='動画ができました。緑の「動画を保存する」を押してね。';
 }
