@@ -110,11 +110,7 @@ async function scene(kind,entry,progress=1){
  if(kind==='travel')for(const e of current.entries){const move=alongChoppy(pathFor(e.start),progress);await drawCharacter(ctx,e,move.x,move.y-move.bob,118,false,true,move.tilt)}
  if(kind==='goal'||kind==='goalResults'){const settled=kind==='goal'?0:progress*5/44,time=kind==='goal'?progress:1+settled;drawCelebrationConfetti(ctx,time);for(const [i,e] of current.entries.entries()){const size=['こてりん','ろっどん'].includes(e.character.name)?150:178;const hop=kind==='goal'?Math.abs(Math.sin(progress*Math.PI*4+i*.9))*16:(1-settled)*Math.abs(Math.sin(i*.9))*16;await drawCharacter(ctx,e,amidaX[e.goal],amidaGoalY-hop,size)}}
  if(kind==='results'){
-   // 結果を一覧で先見せしない。続く announce / card で1人ずつ発表する。
-   drawCelebrationConfetti(ctx,1.3);
-   ctx.textAlign='center';ctx.textBaseline='middle';
-   ctx.font='900 78px "Hiragino Sans","Yu Gothic",sans-serif';ctx.fillStyle='#4a2616';ctx.fillText('結果発表',524,1110);
-   ctx.font='800 38px "Hiragino Sans","Yu Gothic",sans-serif';ctx.fillStyle='#6a483b';ctx.fillText('いちばん良い運勢から発表します',524,1185);
+   // 元の結果背景だけを表示する。あみだの上へ説明文字は重ねない。
  }
  if(kind==='announce'){
    // announcementIndex は運勢順位。ゴール色・キャラの並びには依存しない。
