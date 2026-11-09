@@ -105,8 +105,8 @@ async function scene(kind,entry,progress=1){
    drawFortunePanel(ctx,entry.rank);
    drawLuckyPanel(ctx,entry.rank);
    drawLuckyCommentPanel(ctx,entry.rank);
-   // 中吉・吉・凶の台紙は枠が少し下にあるため、大吉と同じ見え方になるよう補正する。
-   const cardTextY=['中吉','吉','凶'].includes(entry.rank)?14:0;
+   // 枠を共通レイアウトにしたため、全ランクで同じ文字位置に揃える。
+   const cardTextY=0;
    const fortuneLayout=fortuneCommentLayout(ctx,entry.message,850);
    ctx.font=`900 ${fortuneLayout.size}px "Hiragino Sans","Yu Gothic",sans-serif`;
    centeredText(ctx,fortuneLayout.lines,524,939+cardTextY,850,fortuneLayout.lineHeight,accent[entry.rank],'transparent',0);
