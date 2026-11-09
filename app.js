@@ -83,8 +83,8 @@ function roundedPanel(ctx,x,y,w,h,r,fill,stroke='',lineWidth=0){ctx.beginPath();
 // 台紙にもともとある枠線を覆い、全ランクで同じ新しい枠だけを見せる。
 const panelBackdrop={髪吉:'#fce9ef',大吉:'#fff2bf',中吉:'#dbf2ff',小吉:'#e5f8d9',吉:'#eee1ff',凶:'#ffe1db'};
 function drawFortunePanel(ctx,rank){const bg=panelBackdrop[rank]||'#f8eeee';roundedPanel(ctx,30,796,988,290,48,bg);roundedPanel(ctx,74,804,900,270,42,'#fffdf8',accent[rank],8)}
-function drawLuckyPanel(ctx,rank){const bg=panelBackdrop[rank]||'#f8eeee';roundedPanel(ctx,70,1080,888,138,42,bg);roundedPanel(ctx,94,1082,860,134,40,'#fffdf8');roundedPanel(ctx,118,1099,812,100,30,luckyPanelFill[rank]||'#f3d0d0')}
-function drawLuckyCommentPanel(ctx,rank){const bg=panelBackdrop[rank]||'#f8eeee';roundedPanel(ctx,70,1220,888,250,42,bg);roundedPanel(ctx,94,1232,860,160,40,'#fffdf8')}
+function drawLuckyPanel(ctx,rank){const bg=panelBackdrop[rank]||'#f8eeee';roundedPanel(ctx,30,1076,988,146,48,bg);roundedPanel(ctx,94,1082,860,134,40,'#fffdf8');roundedPanel(ctx,118,1099,812,100,30,luckyPanelFill[rank]||'#f3d0d0')}
+function drawLuckyCommentPanel(ctx,rank){const bg=panelBackdrop[rank]||'#f8eeee';roundedPanel(ctx,30,1216,988,266,48,bg);roundedPanel(ctx,94,1232,860,160,40,'#fffdf8')}
 async function scene(kind,entry,progress=1){
  const bgName=kind==='select'?'select.png':kind==='start'||kind==='travel'?'start.png':kind==='goal'||kind==='goalResults'?'goal.png':kind==='results'?'results.png':ranks[entry?.rank||'大吉'].asset;
  const bg=await load(A+bgName),c=makeCanvas(bg.width,bg.height),ctx=c.getContext('2d');ctx.drawImage(bg,0,0);if(kind==='select')drawSelectHeading(ctx);if(kind==='goalResults'){const resultBg=await load(A+'results.png');ctx.globalAlpha=progress;ctx.drawImage(resultBg,0,0);ctx.globalAlpha=1}
