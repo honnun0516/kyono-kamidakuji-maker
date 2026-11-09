@@ -81,8 +81,8 @@ function drawCelebrationConfetti(ctx,time){const launch=Math.min(1,time),fall=Ma
 const luckyPanelFill={髪吉:'#f7adc1',大吉:'#ffd76c',中吉:'#a9def7',小吉:'#b8eab1',吉:'#cfabea',凶:'#f5a39b'};
 function roundedPanel(ctx,x,y,w,h,r,fill,stroke='',lineWidth=0){ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.quadraticCurveTo(x+w,y,x+w,y+r);ctx.lineTo(x+w,y+h-r);ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);ctx.lineTo(x+r,y+h);ctx.quadraticCurveTo(x,y+h,x,y+h-r);ctx.lineTo(x,y+r);ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath();ctx.fillStyle=fill;ctx.fill();if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=lineWidth;ctx.stroke()}}
 // 文章用の白枠を広げ、3行でもラッキーアイテム枠へ重ならないようにする。
-function drawFortunePanel(ctx,rank){roundedPanel(ctx,74,804,900,238,42,'#fffdf8',accent[rank],8)}
-function drawLuckyPanel(ctx,rank){roundedPanel(ctx,94,1042,860,130,44,'#fffdf8');roundedPanel(ctx,118,1090,812,130,34,luckyPanelFill[rank]||'#f3d0d0')}
+function drawFortunePanel(ctx,rank){roundedPanel(ctx,74,804,900,310,42,'#fffdf8',accent[rank],8)}
+function drawLuckyPanel(ctx,rank){roundedPanel(ctx,94,1114,860,134,44,'#fffdf8');roundedPanel(ctx,118,1160,812,87,34,luckyPanelFill[rank]||'#f3d0d0')}
 async function scene(kind,entry,progress=1){
  const bgName=kind==='select'?'select.png':kind==='start'||kind==='travel'?'start.png':kind==='goal'||kind==='goalResults'?'goal.png':kind==='results'?'results.png':ranks[entry?.rank||'大吉'].asset;
  const bg=await load(A+bgName),c=makeCanvas(bg.width,bg.height),ctx=c.getContext('2d');ctx.drawImage(bg,0,0);if(kind==='select')drawSelectHeading(ctx);if(kind==='goalResults'){const resultBg=await load(A+'results.png');ctx.globalAlpha=progress;ctx.drawImage(resultBg,0,0);ctx.globalAlpha=1}
@@ -100,11 +100,11 @@ async function scene(kind,entry,progress=1){
    const cardTextY=['中吉','吉','凶'].includes(entry.rank)?14:0;
    const fortuneLayout=fortuneCommentLayout(ctx,entry.message,850);
    ctx.font=`900 ${fortuneLayout.size}px "Hiragino Sans","Yu Gothic",sans-serif`;
-   centeredText(ctx,fortuneLayout.lines,524,920+cardTextY,850,fortuneLayout.lineHeight,accent[entry.rank],'transparent',0);
+   centeredText(ctx,fortuneLayout.lines,524,959+cardTextY,850,fortuneLayout.lineHeight,accent[entry.rank],'transparent',0);
    ctx.font='900 34px "Hiragino Sans","Yu Gothic",sans-serif';
-   centeredText(ctx,luckyLabel(entry.lucky.name),524,1132+cardTextY,760,40,'#15110e','transparent',0);
+   centeredText(ctx,luckyLabel(entry.lucky.name),524,1180+cardTextY,760,36,'#15110e','transparent',0);
    ctx.font='900 50px "Hiragino Sans","Yu Gothic",sans-serif';
-   centeredText(ctx,entry.lucky.name,524,1180+cardTextY,720,50,'#15110e','transparent',0);
+   centeredText(ctx,entry.lucky.name,524,1213+cardTextY,720,44,'#15110e','transparent',0);
    const luckyLayout=luckyCommentLayout(ctx,entry.lucky.text,850);
    ctx.font=`900 ${luckyLayout.size}px "Hiragino Sans","Yu Gothic",sans-serif`;
    centeredText(ctx,luckyLayout.lines,524,1285+cardTextY,850,luckyLayout.lineHeight,'#111','transparent',0);
