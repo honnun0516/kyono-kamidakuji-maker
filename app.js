@@ -110,10 +110,12 @@ async function scene(kind,entry,progress=1){
    const fortuneLayout=fortuneCommentLayout(ctx,entry.message,850);
    ctx.font=`900 ${fortuneLayout.size}px "Hiragino Sans","Yu Gothic",sans-serif`;
    centeredText(ctx,fortuneLayout.lines,524,939+cardTextY,850,fortuneLayout.lineHeight,accent[entry.rank],'transparent',0);
+   // 中吉・吉だけ視覚的に下寄りに見えるため、真ん中のアイテム文字を黄色と同じ高さへ揃える。
+   const itemTextY=['中吉','吉'].includes(entry.rank)?-10:0;
    ctx.font='900 24px "Hiragino Sans","Yu Gothic",sans-serif';
-   centeredText(ctx,luckyLabel(entry.lucky.name),524,1126+cardTextY,760,28,'#15110e','transparent',0);
+   centeredText(ctx,luckyLabel(entry.lucky.name),524,1126+itemTextY,760,28,'#15110e','transparent',0);
    ctx.font='900 40px "Hiragino Sans","Yu Gothic",sans-serif';
-   centeredText(ctx,entry.lucky.name,524,1164+cardTextY,720,44,'#15110e','transparent',0);
+   centeredText(ctx,entry.lucky.name,524,1164+itemTextY,720,44,'#15110e','transparent',0);
    const luckyLayout=luckyCommentLayout(ctx,entry.lucky.text,850);
    ctx.font=`900 ${luckyLayout.size}px "Hiragino Sans","Yu Gothic",sans-serif`;
    centeredText(ctx,luckyLayout.lines,524,1307+cardTextY,850,luckyLayout.lineHeight,'#111','transparent',0);
