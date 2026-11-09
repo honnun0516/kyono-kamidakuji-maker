@@ -82,8 +82,10 @@ const luckyPanelFill={髪吉:'#f7adc1',大吉:'#ffd76c',中吉:'#a9def7',小吉:
 function roundedPanel(ctx,x,y,w,h,r,fill,stroke='',lineWidth=0){ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.quadraticCurveTo(x+w,y,x+w,y+r);ctx.lineTo(x+w,y+h-r);ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);ctx.lineTo(x+r,y+h);ctx.quadraticCurveTo(x,y+h,x,y+h-r);ctx.lineTo(x,y+r);ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath();ctx.fillStyle=fill;ctx.fill();if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=lineWidth;ctx.stroke()}}
 // 台紙にもともとある枠線を覆い、全ランクで同じ新しい枠だけを見せる。
 const panelBackdrop={髪吉:'#fce9ef',大吉:'#fff2bf',中吉:'#dbf2ff',小吉:'#e5f8d9',吉:'#eee1ff',凶:'#ffe1db'};
+const panelDecor={髪吉:['#f8c6d3','#f7dbe3'],大吉:['#ffe38a','#fff1b9'],中吉:['#aee4fa','#d3f1fd'],小吉:['#aee89f','#d9f5cc'],吉:['#d3b4f3','#eadbfb'],凶:['#ffb8ae','#ffdcd5']};
 // キャラの下に元台紙の罫線・古い枠が残らないよう、下半分を先に背景色で完全に整える。
 function clearOriginalCardFrames(ctx,rank){ctx.fillStyle=panelBackdrop[rank]||'#f8eeee';ctx.fillRect(0,786,1048,704)}
+function drawOuterCardDecor(ctx,rank){const [a,b]=panelDecor[rank]||['#f5d7d7','#f8e8e8'];ctx.save();ctx.globalAlpha=.54;for(const [x,y,rx,ry,rot,color] of [[-42,845,190,105,-.42,a],[1090,900,190,126,.42,b],[-58,1128,155,115,.28,b],[1094,1210,170,120,-.28,a],[-30,1405,170,105,-.35,a],[1080,1408,195,130,.34,b]]){ctx.fillStyle=color;ctx.beginPath();ctx.ellipse(x,y,rx,ry,rot,0,Math.PI*2);ctx.fill()}ctx.restore()}
 function drawFortunePanel(ctx,rank){roundedPanel(ctx,74,804,900,270,42,'#fffdf8',accent[rank],8)}
 function drawLuckyPanel(ctx,rank){roundedPanel(ctx,149,1099,750,100,30,luckyPanelFill[rank]||'#f3d0d0')}
 function drawLuckyCommentPanel(ctx,rank){roundedPanel(ctx,94,1232,860,160,40,'#fffdf8')}
@@ -99,6 +101,7 @@ async function scene(kind,entry,progress=1){
    await drawCharacter(ctx,entry,524,785,400,true);
    // 上のコメント枠を広くして、45px・3行の文章も余裕を持って収める。
    clearOriginalCardFrames(ctx,entry.rank);
+   drawOuterCardDecor(ctx,entry.rank);
    drawFortunePanel(ctx,entry.rank);
    drawLuckyPanel(ctx,entry.rank);
    drawLuckyCommentPanel(ctx,entry.rank);
