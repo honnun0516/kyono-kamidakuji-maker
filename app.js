@@ -104,7 +104,7 @@ function drawFortunePanel(ctx,rank){roundedPanel(ctx,74,804,900,270,42,'#fffdf8'
 function drawLuckyPanel(ctx,rank){roundedPanel(ctx,149,1099,750,100,30,luckyPanelFill[rank]||'#f3d0d0')}
 function drawLuckyCommentPanel(ctx,rank){roundedPanel(ctx,94,1232,860,160,40,'#fffdf8')}
 async function scene(kind,entry,progress=1){
- const bgName=kind==='select'?'select.png':kind==='start'||kind==='travel'?'start.png':kind==='goal'||kind==='goalResults'?'goal.png':kind==='results'||kind==='announce'?'results.png':ranks[entry?.rank||'大吉'].asset;
+ const bgName=kind==='select'?'select.png':kind==='start'||kind==='travel'?'start.png':kind==='goal'||kind==='goalResults'?'goal.png':kind==='results'?'results.png':ranks[entry?.rank||'大吉'].asset;
  const bg=await load(A+bgName),c=makeCanvas(bg.width,bg.height),ctx=c.getContext('2d');ctx.drawImage(bg,0,0);if(kind==='select')drawSelectHeading(ctx);if(kind==='goalResults'){const resultBg=await load(A+'results.png');ctx.globalAlpha=progress;ctx.drawImage(resultBg,0,0);ctx.globalAlpha=1}
  if(kind==='select'||kind==='start')for(const [i,e] of current.entries.entries()){const base={しゃんぷぅ:145,だっかる:145}[e.character.name]||128;const size=kind==='select'?Math.round(base*1.55):base;const hop=kind==='select'?Math.max(0,Math.sin(progress*Math.PI*6+i*.8))*16:0;await drawCharacter(ctx,e,amidaX[e.start],amidaStartY+4-hop,size,true)}
  if(kind==='travel')for(const e of current.entries){const move=alongChoppy(pathFor(e.start),progress);await drawCharacter(ctx,e,move.x,move.y-move.bob,118,false,true,move.tilt)}
