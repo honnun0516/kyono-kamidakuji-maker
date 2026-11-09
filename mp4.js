@@ -20,8 +20,10 @@ async function exportWithWebCodecs(status){
  for(let i=0;i<75;i++)await add(await scene('select',null,i/74),1);
  await add(await scene('start'),36);
  for(let i=0;i<153;i++)await add(await scene('travel',null,i/152),1);
- for(let i=0;i<51;i++)await add(await scene('goal',null,i/50),1);for(let i=1;i<=5;i++)await add(await scene('goalResults',null,i/5),1);for(let i=6;i<45;i++)await add(await scene('results',null,i/44),1);
- for(const e of current.entries)await add(await scene('card',e),105);
+ for(let i=0;i<51;i++)await add(await scene('goal',null,i/50),1);
+ // MP4の発表順は、あみだのスタート／ゴールの並びではなく運勢順位だけで決める。
+ const announcements=current.announcementEntries||announcementOrder(current.entries);
+ for(const e of announcements){await add(await scene('announce',e),27);await add(await scene('card',e),105);}
  await add(await endingFrame(),90);
  await encoder.flush();if(encodeError)throw encodeError;muxer.finalize();
  return new Blob([target.buffer],{type:'video/mp4'});
@@ -34,7 +36,7 @@ async function exportInstagramMp4(){if(!current)return;const btn=document.queryS
  // Safari は h264 という別名ではなく avc1／video/mp4 を返す。Safari対応のMP4形式を先に選ぶ。
  const stream=video.captureStream(30),mime=['video/mp4;codecs=avc1.42E01E','video/mp4;codecs=avc1','video/mp4','video/webm;codecs=vp9'].find(type=>MediaRecorder.isTypeSupported(type));
  if(!mime)throw new Error('No supported video recording format');
- const intro=await openingFrame(),startFrame=await scene('start'),cardFrames=await Promise.all(current.entries.map(e=>scene('card',e))),ending=await endingFrame();
+ const intro=await openingFrame(),startFrame=await scene('start'),announcements=current.announcementEntries||announcementOrder(current.entries),announceFrames=await Promise.all(announcements.map(e=>scene('announce',e))),cardFrames=await Promise.all(announcements.map(e=>scene('card',e))),ending=await endingFrame();
  const rec=new MediaRecorder(stream,{mimeType:mime,videoBitsPerSecond:7000000}),parts=[];rec.ondataavailable=e=>e.data.size&&parts.push(e.data);rec.start();
  const holdFrame=async(frame,ms)=>{fitToVideo(video,frame);await new Promise(r=>setTimeout(r,ms))};
  const play=async(kind,count)=>{for(let i=0;i<count;i++){fitToVideo(video,await scene(kind,null,i/(count-1)));await new Promise(r=>setTimeout(r,1000/30))}};
@@ -43,9 +45,8 @@ async function exportInstagramMp4(){if(!current)return;const btn=document.queryS
  await holdFrame(startFrame,1200);
  await play('travel',153);
  await play('goal',51);
- for(let i=1;i<=5;i++){fitToVideo(video,await scene('goalResults',null,i/5));await new Promise(r=>setTimeout(r,1000/30))}
- for(let i=6;i<45;i++){fitToVideo(video,await scene('results',null,i/44));await new Promise(r=>setTimeout(r,1000/30))}
- for(const card of cardFrames)await holdFrame(card,3500);
+ // ゴール直後から、良い運勢順に「発表 → 結果カード」を1人ずつ見せる。あみだ上への結果説明は出さない。
+ for(let i=0;i<announcements.length;i++){await holdFrame(announceFrames[i],900);await holdFrame(cardFrames[i],3500);}
  await holdFrame(ending,3000);
  const stopped=new Promise(r=>rec.addEventListener('stop',r,{once:true}));rec.stop();await stopped;let blob=new Blob(parts,{type:mime});fallbackBlob=blob;
  if(!mime.includes('mp4')){status.textContent='Instagram用MP4に変換しています。初回は少し待ってね。';const ffmpeg=await loadInstagramFfmpeg(),{fetchFile}=instagramFfmpegUtil;await ffmpeg.writeFile('input.webm',await fetchFile(blob));await ffmpeg.exec(['-i','input.webm','-c:v','libx264','-preset','veryfast','-crf','23','-pix_fmt','yuv420p','-movflags','+faststart','output.mp4']);const data=await ffmpeg.readFile('output.mp4');await ffmpeg.deleteFile('input.webm');await ffmpeg.deleteFile('output.mp4');blob=new Blob([data.buffer],{type:'video/mp4'})}
