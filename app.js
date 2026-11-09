@@ -133,7 +133,7 @@ async function scene(kind,entry,progress=1){
  }
  return c;
 }
-async function render(){const p=document.querySelector('#pages');p.innerHTML='';const cards=[['選ぶ','select'],['スタート','start'],['ゴール','goal'],['結果発表','results'],...current.entries.map(e=>[`${e.character.name}・${e.rank}`,'card',e])];for(const [label,kind,e]of cards){const article=document.createElement('article');article.className='scene';article.innerHTML=`<p>${label}</p>`;const canvas=await scene(kind,e);canvas.className='scene-canvas';article.append(canvas);p.append(article)}const s=document.querySelector('#summary');s.hidden=false;s.innerHTML=current.entries.map(e=>`<div class="chip"><b>${e.character.name}（${e.start}→${e.goal}）</b><span>${e.rank}</span></div>`).join('')}
+async function render(){const p=document.querySelector('#pages');p.innerHTML='';const resultEntries=[...current.entries].sort((a,b)=>rankOrder.indexOf(a.rank)-rankOrder.indexOf(b.rank));const cards=[['選ぶ','select'],['スタート','start'],['ゴール','goal'],['結果発表','results'],...resultEntries.map(e=>[`${e.character.name}・${e.rank}`,'card',e])];for(const [label,kind,e]of cards){const article=document.createElement('article');article.className='scene';article.innerHTML=`<p>${label}</p>`;const canvas=await scene(kind,e);canvas.className='scene-canvas';article.append(canvas);p.append(article)}const s=document.querySelector('#summary');s.hidden=false;s.innerHTML=resultEntries.map(e=>`<div class="chip"><b>${e.character.name}（${e.start}→${e.goal}）</b><span>${e.rank}</span></div>`).join('')}
 function fitToVideo(video,frame){const ctx=video.getContext('2d');ctx.fillStyle='#fffdf8';ctx.fillRect(0,0,1080,1920);const s=Math.min(1080/frame.width,1920/frame.height),w=frame.width*s,h=frame.height*s;ctx.drawImage(frame,(1080-w)/2,(1920-h)/2,w,h)}
 let videoUrl='';
 async function exportMp4(){
@@ -144,7 +144,8 @@ async function exportMp4(){
  // 線は固定。4人だけが、実際のあみだの横線を通って移動する。
  for(let i=0;i<=36;i++){fitToVideo(video,await scene('travel',null,i/36));await new Promise(r=>setTimeout(r,85))}
  await hold('goal',null,1700);await hold('results',null,1500);
- for(const e of current.entries)await hold('card',e,3500);
+ // 発表カードは、ゴールの色ではなく運勢の良い順に見せる。
+ for(const e of [...current.entries].sort((a,b)=>rankOrder.indexOf(a.rank)-rankOrder.indexOf(b.rank)))await hold('card',e,3500);
  const stopped=new Promise(r=>rec.addEventListener('stop',r,{once:true}));rec.stop();await stopped;
  const blob=new Blob(parts,{type:mime});if(videoUrl)URL.revokeObjectURL(videoUrl);videoUrl=URL.createObjectURL(blob);const ext=mime.includes('mp4')?'mp4':'webm';save.href=videoUrl;save.download=`今日の髪だくじ_${new Date().toISOString().slice(0,10)}.${ext}`;save.hidden=false;btn.disabled=false;document.querySelector('#status').textContent='動画ができました。緑の「動画を保存する」を押してね。';
 }
