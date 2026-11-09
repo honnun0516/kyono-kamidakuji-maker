@@ -80,9 +80,11 @@ function drawSelectHeading(ctx){ctx.save();ctx.fillStyle='#fffdf8';ctx.fillRect(
 function drawCelebrationConfetti(ctx,time){const launch=Math.min(1,time),fall=Math.max(0,time-1);for(let i=0;i<22;i++){const left=i<11,slot=i%11,angle=(-1.15+slot*.23)*(left?1:-1),distance=launch*(150+slot*34),x=(left?58:990)+(left?Math.cos(angle)*distance:-Math.cos(angle)*distance)+(left?1:-1)*fall*(18+slot*2),y=660+Math.sin(angle)*distance+slot*22+launch*launch*250+fall*(130+slot*14)+fall*fall*150,opacity=Math.max(0,1-fall*.8);ctx.save();ctx.globalAlpha=opacity;ctx.translate(x,y);ctx.rotate((left?-1:1)*(slot*.38+time*2.8));ctx.fillStyle=['#ff7184','#ffd14a','#35b7ec','#70d476','#b487ec'][i%5];ctx.fillRect(-9,-20,18,40);ctx.restore()}}
 const luckyPanelFill={髪吉:'#f7adc1',大吉:'#ffd76c',中吉:'#a9def7',小吉:'#b8eab1',吉:'#cfabea',凶:'#f5a39b'};
 function roundedPanel(ctx,x,y,w,h,r,fill,stroke='',lineWidth=0){ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.quadraticCurveTo(x+w,y,x+w,y+r);ctx.lineTo(x+w,y+h-r);ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);ctx.lineTo(x+r,y+h);ctx.quadraticCurveTo(x,y+h,x,y+h-r);ctx.lineTo(x,y+r);ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath();ctx.fillStyle=fill;ctx.fill();if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=lineWidth;ctx.stroke()}}
-// 文章用の白枠を広げ、3行でもラッキーアイテム枠へ重ならないようにする。
-function drawFortunePanel(ctx,rank){roundedPanel(ctx,74,804,900,310,42,'#fffdf8',accent[rank],8)}
-function drawLuckyPanel(ctx,rank){roundedPanel(ctx,94,1114,860,134,44,'#fffdf8');roundedPanel(ctx,118,1160,812,87,34,luckyPanelFill[rank]||'#f3d0d0')}
+// 台紙にもともとある枠線を覆い、全ランクで同じ新しい枠だけを見せる。
+const panelBackdrop={髪吉:'#fce9ef',大吉:'#fff2bf',中吉:'#dbf2ff',小吉:'#e5f8d9',吉:'#eee1ff',凶:'#ffe1db'};
+function drawFortunePanel(ctx,rank){const bg=panelBackdrop[rank]||'#f8eeee';roundedPanel(ctx,30,796,988,330,48,bg);roundedPanel(ctx,74,804,900,310,42,'#fffdf8',accent[rank],8)}
+function drawLuckyPanel(ctx,rank){const bg=panelBackdrop[rank]||'#f8eeee';roundedPanel(ctx,70,1116,888,136,42,bg);roundedPanel(ctx,94,1118,860,130,40,'#fffdf8');roundedPanel(ctx,118,1160,812,87,30,luckyPanelFill[rank]||'#f3d0d0')}
+function drawLuckyCommentPanel(ctx,rank){const bg=panelBackdrop[rank]||'#f8eeee';roundedPanel(ctx,70,1248,888,250,42,bg);roundedPanel(ctx,94,1260,860,160,40,'#fffdf8')}
 async function scene(kind,entry,progress=1){
  const bgName=kind==='select'?'select.png':kind==='start'||kind==='travel'?'start.png':kind==='goal'||kind==='goalResults'?'goal.png':kind==='results'?'results.png':ranks[entry?.rank||'大吉'].asset;
  const bg=await load(A+bgName),c=makeCanvas(bg.width,bg.height),ctx=c.getContext('2d');ctx.drawImage(bg,0,0);if(kind==='select')drawSelectHeading(ctx);if(kind==='goalResults'){const resultBg=await load(A+'results.png');ctx.globalAlpha=progress;ctx.drawImage(resultBg,0,0);ctx.globalAlpha=1}
@@ -96,6 +98,7 @@ async function scene(kind,entry,progress=1){
    // 上のコメント枠を広くして、45px・3行の文章も余裕を持って収める。
    drawFortunePanel(ctx,entry.rank);
    drawLuckyPanel(ctx,entry.rank);
+   drawLuckyCommentPanel(ctx,entry.rank);
    // 中吉・吉・凶の台紙は枠が少し下にあるため、大吉と同じ見え方になるよう補正する。
    const cardTextY=['中吉','吉','凶'].includes(entry.rank)?14:0;
    const fortuneLayout=fortuneCommentLayout(ctx,entry.message,850);
@@ -107,7 +110,7 @@ async function scene(kind,entry,progress=1){
    centeredText(ctx,entry.lucky.name,524,1213+cardTextY,720,44,'#15110e','transparent',0);
    const luckyLayout=luckyCommentLayout(ctx,entry.lucky.text,850);
    ctx.font=`900 ${luckyLayout.size}px "Hiragino Sans","Yu Gothic",sans-serif`;
-   centeredText(ctx,luckyLayout.lines,524,1285+cardTextY,850,luckyLayout.lineHeight,'#111','transparent',0);
+   centeredText(ctx,luckyLayout.lines,524,1335+cardTextY,850,luckyLayout.lineHeight,'#111','transparent',0);
  }
  return c;
 }
